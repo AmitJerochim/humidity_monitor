@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.14.2/d3.js"></script>
+
+</head>
+
+<body>
+<script>
+const margin = {top: 10, right: 30, bottom: 30, left: 60};
+const height = 550;
+const width = 550;
+
+const data1= 
+	[
+		{'time': new Date('1999'), 'y': 5},
+		{'time': new Date('2000'), 'y': 1},
+		{'time': new Date('2001'), 'y': 29},
+		{'time': new Date('2002'), 'y': 3},
+		{'time': new Date('2003'), 'y': 12},
+		{'time': new Date('2004'), 'y': 5},
+		{'time': new Date('2005'), 'y': 6},
+		{'time': new Date('2006'), 'y': 24},
+	];
+const data = 
+	[
+		{'x': 0, 'y': 0},
+		{'x': 45, 'y': 9},
+		{'x': 5, 'y': 3},
+		{'x': 65, 'y': 1},
+		{'x': 7, 'y': 8},
+		{'x': 9, 'y': 4},
+		{'x': 2, 'y': 8},	
+		{'x': 55, 'y': 3},
+		{'x': 4, 'y': 9},
+		{'x': 53, 'y': 3},
+		{'x': 7, 'y': 1}
+
+	]
+
+const svg =d3.select('body').append('svg')
+	.attr('height', height)
+	.attr('width' , width);
+	
+
+const renderTimeYLine = ( svg, data) => { 
+
+const timeValues = data.map((d) => {return d['time'];});
+const yValues = data.map((d) => {return d['y'];});
+
+// console.log(timeValues);
+
+const minDate = timeValues.reduce( 
+	(acc, current ) => { 
+		if(current < acc){ return current;}
+		else{return acc;}
+});
+
+//console.log("minDate" +minDate);
+
+console.log( [d3.min(timeValues), d3.max(timeValues)] );
+
+const xScale = d3.scaleTime()
+	.domain([d3.min(timeValues), d3.max(timeValues)]) 
+	.range([10, width-50]);
+
+const yScale = d3.scaleLinear()
+	.domain([d3.max(yValues), 0])
+	.range([10, height-50]);
+	
+const xAxis = d3.axisBottom()
+	.scale(xScale);
+
+const yAxis = d3.axisLeft()
+	.scale(yScale);
+	
+svg.append('g')
+	.attr('transform', 'translate(30 00)')
+	.call(yAxis);
+
+svg.append('g')
+	.attr('transform', 'translate(20 500)')
+	.call(xAxis);
+
+svg
+	.append('g')
+	.attr('transform', 'translate(20 00)')
+	.selectAll('rect')
+	.data(data).enter()
+	.append('circle')
+	.attr('r', 2.5)
+	.attr('class', "hoverable")
+	.attr('cx', (d) => {return xScale(d['time']);})
+	.attr('cy', (d) => {return yScale(d['y']);} );
+	
+
+
+svg
+	.append('g')
+	.attr('transform', 'translate(20 00)')
+	.append("path")
+	.datum(data)
+	.attr('fill', 'none')
+	.attr('stroke', 'steelblue')
+	.attr('stroke-width', 2)
+	.attr('d', d3.line()
+		.x(function(d) { return xScale(d['time'])})
+		.y(function(d) { return yScale(d['y'])})
+		)
+
+	}
+renderTimeYLine(svg, data1);
+
+
+
+</script>
+
+  <p>Hello, world!</p>
+
+</body>
+
+</html>
