@@ -1,11 +1,11 @@
 const bodyParser = require("body-parser");
 const fs = require('fs');
 const http = require('http');
-const hostname = '127.0.0.1';
+const hostname = '192.168.178.55';
 const port = 3000;
 
 let newData='';
-
+let dataArray=[]; 
 const server = http.createServer((req, res) => {
 if(/^\/[a-zA-Z0-9\/]*.js$/.test(req.url.toString())){
    sendFileContent(res, req.url.toString().substring(1), "text/javascript");
@@ -30,6 +30,7 @@ function sendFileContent(res, fileName, contentType){
 	body += data;
         console.log(body)
         newData=body;
+        dataArray.push(data);
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/plain');
         res.end();
@@ -42,7 +43,7 @@ function sendFileContent(res, fileName, contentType){
      console.log("dirname:" + __dirname)
      res.statusCode = 200;
      res.setHeader('Content-Type', 'text/html');
-     let path=__dirname+"/view/index.html";
+     let path=__dirname+"/view/d3js.html";
      console.log("path:" + path)
      let readStream = fs.createReadStream(path);
      fs.readFile(path, (err, file)=>{
@@ -50,15 +51,13 @@ function sendFileContent(res, fileName, contentType){
        if (err) {console.log(err)};
        if(file){ console.log(file);
        res.write(file);
-
        res.end();}
     });
-     //readStream.pipe(res);
-     // res.sendFile(newData);
   }
 
   if (req.method==='GET' && req.url==='/data') {
-
+     res.end(dataArray.join());
+     //res.end(newData);
   }
 });
 

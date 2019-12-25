@@ -14,54 +14,19 @@ const margin = {top: 10, right: 30, bottom: 30, left: 60};
 const height = 550;
 const width = 550;
 
-const data1= 
-	[
-		{'time': new Date('1999'), 'y': 5},
-		{'time': new Date('2000'), 'y': 1},
-		{'time': new Date('2001'), 'y': 29},
-		{'time': new Date('2002'), 'y': 3},
-		{'time': new Date('2003'), 'y': 12},
-		{'time': new Date('2004'), 'y': 5},
-		{'time': new Date('2005'), 'y': 6},
-		{'time': new Date('2006'), 'y': 24},
-	];
-const data = 
-	[
-		{'x': 0, 'y': 0},
-		{'x': 45, 'y': 9},
-		{'x': 5, 'y': 3},
-		{'x': 65, 'y': 1},
-		{'x': 7, 'y': 8},
-		{'x': 9, 'y': 4},
-		{'x': 2, 'y': 8},	
-		{'x': 55, 'y': 3},
-		{'x': 4, 'y': 9},
-		{'x': 53, 'y': 3},
-		{'x': 7, 'y': 1}
+const clonable=document.createElement('svg');
 
-	]
+	clonable.setAttribute('height', height)
+	clonable.setAttribute('width' , width);
 
-const svg =d3.select('body').append('svg')
+let svg =d3.select('body').append('svg')
 	.attr('height', height)
 	.attr('width' , width);
-	
 
 const renderTimeYLine = ( svg, data) => { 
 
-const timeValues = data.map((d) => {return d['time'];});
-const yValues = data.map((d) => {return d['y'];});
-
-// console.log(timeValues);
-
-const minDate = timeValues.reduce( 
-	(acc, current ) => { 
-		if(current < acc){ return current;}
-		else{return acc;}
-});
-
-//console.log("minDate" +minDate);
-
-console.log( [d3.min(timeValues), d3.max(timeValues)] );
+const timeValues = data.map((d) => {return new Date(d['time']);});
+const yValues = data.map((d) => {return parseInt(d['temp']);});
 
 const xScale = d3.scaleTime()
 	.domain([d3.min(timeValues), d3.max(timeValues)]) 
@@ -93,8 +58,8 @@ svg
 	.append('circle')
 	.attr('r', 2.5)
 	.attr('class', "hoverable")
-	.attr('cx', (d) => {return xScale(d['time']);})
-	.attr('cy', (d) => {return yScale(d['y']);} );
+	.attr('cx', (d) => {return xScale(new Date(d['time']));})
+	.attr('cy', (d) => {return yScale(d['temp']);} );
 	
 
 
@@ -107,15 +72,41 @@ svg
 	.attr('stroke', 'steelblue')
 	.attr('stroke-width', 2)
 	.attr('d', d3.line()
-		.x(function(d) { return xScale(d['time'])})
-		.y(function(d) { return yScale(d['y'])})
+		.x(function(d) { return xScale(new Date(d['time']))})
+		.y(function(d) { return yScale(d['temp'])})
 		)
 
 	}
-renderTimeYLine(svg, data1);
 
 
+let sample =[]
+const updateChart = () =>{
+   setInterval( ()=> {
 
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', '/data');
+      xhr.addEventListener('load', ()=>{
+         if(xhr.status === 200){
+           //let svg = document.getElementsByTagName('svg')[0];
+           //console.log(svg);
+           svg.remove();
+            //svg =clonable.cloneNode(true);
+            //document.body.appendChild(svg);
+            svg = d3.select("body").append('svg')
+               .attr('height', height)
+               .attr('width', width);
+            console.log(svg);
+            sample = '[' + xhr.responseText +']';
+            sample = JSON.parse(sample);
+            renderTimeYLine(svg, sample);
+        }
+
+});
+xhr.send();
+   }, 5000 );
+}
+
+updateChart();
 </script>
 
   <p>Hello, world!</p>
