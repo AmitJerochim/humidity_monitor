@@ -26,41 +26,71 @@ let svg =d3.select('body').append('svg')
 const renderTimeYLine = ( svg, data) => { 
 
 const timeValues = data.map((d) => {return new Date(d['time']);});
-const yValues = data.map((d) => {return parseInt(d['temp']);});
+const tempValues = data.map((d) => {return parseInt(d['temp']);});
+const humidityValues = data.map((d) => {return parseInt(d['humidity']);});
 
 const xScale = d3.scaleTime()
 	.domain([d3.min(timeValues), d3.max(timeValues)]) 
 	.range([10, width-50]);
 
-const yScale = d3.scaleLinear()
-	.domain([d3.max(yValues), 0])
+const tempScale = d3.scaleLinear()
+	.domain([d3.max(tempValues), 0])
 	.range([10, height-50]);
 	
+
+const humidityScale = d3.scaleLinear()
+	.domain([d3.max(humidityValues), 0])
+	.range([10, height-50]);
+
 const xAxis = d3.axisBottom()
 	.scale(xScale);
 
-const yAxis = d3.axisLeft()
-	.scale(yScale);
+
+const humidityAxis = d3.axisRight()
+	.scale(humidityScale);
+
+const tempAxis = d3.axisLeft()
+	.scale(tempScale);
+	
 	
 svg.append('g')
+	.attr('transform', 'translate(520 00)')
+	.call(humidityAxis);
+
+svg.append('g')
 	.attr('transform', 'translate(30 00)')
-	.call(yAxis);
+	.call(tempAxis);
 
 svg.append('g')
 	.attr('transform', 'translate(20 500)')
 	.call(xAxis);
 
+/*
 svg
 	.append('g')
 	.attr('transform', 'translate(20 00)')
-	.selectAll('rect')
+	.selectAll('circle')
+	.data(data).enter()
+	.append('circle')
+	.attr('r', 2.5)
+	.attr('fill', "red")
+	.attr('cx', (d) => {return xScale(new Date(d['time']));})
+	.attr('cy', (d) => {return humidityScale(d['humidity']);} );
+
+
+
+svg
+	.append('g')
+	.attr('transform', 'translate(20 00)')
+	.selectAll('circle')
 	.data(data).enter()
 	.append('circle')
 	.attr('r', 2.5)
 	.attr('class', "hoverable")
 	.attr('cx', (d) => {return xScale(new Date(d['time']));})
-	.attr('cy', (d) => {return yScale(d['temp']);} );
+	.attr('cy', (d) => {return tempScale(d['temp']);} );
 	
+*/
 
 
 svg
@@ -73,7 +103,20 @@ svg
 	.attr('stroke-width', 2)
 	.attr('d', d3.line()
 		.x(function(d) { return xScale(new Date(d['time']))})
-		.y(function(d) { return yScale(d['temp'])})
+		.y(function(d) { return humidityScale(d['humidity']);})
+		)
+
+svg
+	.append('g')
+	.attr('transform', 'translate(20 00)')
+	.append("path")
+	.datum(data)
+	.attr('fill', 'none')
+	.attr('stroke', 'red')
+	.attr('stroke-width', 2)
+	.attr('d', d3.line()
+		.x(function(d) { return xScale(new Date(d['time']))})
+		.y(function(d) { return tempScale(d['temp']);})
 		)
 
 	}
