@@ -5,7 +5,15 @@ const hostname = '192.168.178.55';
 const port = 3000;
 
 let newData='';
+let temporalData=[];
 let dataArray=[]; 
+
+let getAverage = (array)=>{
+   let sorted  = array.sort(function(a,b){return parseInt(a['temp'])-parseInt(b['temp'])});
+   let middle = Math.round(sorted.length/2);
+   return sorted[middle];
+}
+
 const server = http.createServer((req, res) => {
 if(/^\/[a-zA-Z0-9\/]*.js$/.test(req.url.toString())){
    sendFileContent(res, req.url.toString().substring(1), "text/javascript");
@@ -28,9 +36,12 @@ function sendFileContent(res, fileName, contentType){
      let body = '';
      req.on('data', function(data){
 	body += data;
-        console.log(body)
         newData=body;
-        dataArray.push(data);
+        temporalData.push(newData);
+        if(temporalData.length>= 20){
+           dataArray.push(getAverage(temporalData));
+           temporalData=[];
+        }
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/plain');
         res.end();
@@ -39,12 +50,9 @@ function sendFileContent(res, fileName, contentType){
   }
 
   if(req.method==='GET' && req.url==="/"){
-     console.log("Data:" + newData)
-     console.log("dirname:" + __dirname)
      res.statusCode = 200;
      res.setHeader('Content-Type', 'text/html');
      let path=__dirname+"/view/d3js.html";
-     console.log("path:" + path)
      let readStream = fs.createReadStream(path);
      fs.readFile(path, (err, file)=>{
        console.log("sent"); 
